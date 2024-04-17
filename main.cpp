@@ -15,8 +15,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    cout << config.mount_dir << endl;
-    cout << config.command << endl;
+
 
     CgroupConfig cgroup_config;
     err = cgroup_config.Parse(argc, argv);
@@ -25,7 +24,6 @@ int main(int argc, char **argv)
         cout << err.value().GetMessage() << endl;
         return 0;
     }
-    cout<<cgroup_config.cpu_percent<<endl;
 
     Cgroup cgroup;
     err = cgroup.InitCgroup(cgroup_config);
@@ -34,22 +32,13 @@ int main(int argc, char **argv)
         cout << err.value().GetMessage() << endl;
         return 0;
     }
-    // Step 1: parse CLI parameters, validate Linux kernel/cpu/..., generate hostname for container
 
-    // Step 2: setup a socket pair for container sending messages to the parent process
-
-    // Step 3: allocate stack space for `execve()`
-
-    // Step 4: setup cgroup for the container for resource isolation
-
-    // Step 5: launch container 将 mount, pid, ipc, network device, hostname/domainname 放到独立的 namespace
-
-    // Step 6: error handling and cleanup
+    int i=0;
     while(true)
     {
-        ;
+        cout<<i<<endl;
+        i++;
+        int * p =new int[256];
     }
-    int x;
-    cin>>x;
     return 0;
 }

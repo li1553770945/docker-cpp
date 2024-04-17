@@ -53,6 +53,7 @@ optional<sheep_basic::Error> CgroupConfig::Parse(int argc, char **argv)
         if (key == "mem_max")
         {
             int mem_max_temp = stoi(args.GetValue("mem_max"));
+            cout << mem_max_temp << endl;
             if (mem_max_temp <= 0)
             {
                 return {"mem_max must in bigger than 0,can't be" + key};
@@ -78,14 +79,43 @@ optional<sheep_basic::Error> Cgroup::InitCgroup(CgroupConfig config)
     {
         string path = base_path + "/cpu.max";
         string value = to_string(config.cpu_percent * 1000);
-        std::ofstream cpu_max_file(path);
+        ofstream cpu_max_file(path);
         if (!cpu_max_file.is_open())
         {
             return {sheep_basic::Error(-1, "Failed to open cpu.max file")};
         }
-        cpu_max_file << value; // 限制为10%的CPU使用率
+        cpu_max_file << value;
         cpu_max_file.close();
-        std::cout << "Cgroup and CPU limit set successfully." << std::endl;
+        cout << "==> CPU limit set " + to_string(config.cpu_percent) + " successfully." << endl;
+    }
+
+    if (config.mem_high != 0)
+    {
+        string path = base_path + "/memory.high";
+        string value = to_string(config.mem_high);
+        ofstream mem_high_file(path);
+        if (!mem_high_file.is_open())
+        {
+            return {sheep_basic::Error(-1, "Failed to open cpu.max file")};
+        }
+        mem_high_file << value;
+        mem_high_file.close();
+        cout << "==> mem_high limit set " + to_string(config.mem_high) + " successfully." << endl;
+    }
+    cout << config.mem_max << endl;
+
+    if (config.mem_max != 0)
+    {
+        string path = base_path + "/memory.max";
+        string value = to_string(config.mem_max);
+        ofstream mem_max_file(path);
+        if (!mem_max_file.is_open())
+        {
+            return {sheep_basic::Error(-1, "Failed to open cpu.max file")};
+        }
+        mem_max_file << value;
+        mem_max_file.close();
+        cout << "==> mem_max set " + to_string(config.mem_max) + " successfully." << endl;
     }
 
     string procs_path = base_path + "/cgroup.procs";
