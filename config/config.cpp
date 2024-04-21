@@ -2,26 +2,25 @@
 #include "optional"
 #include "sheep_args.h"
 
-optional<sheep_basic::Error> Config::Parse(int argc, char **argv)
+optional<sheep_basic::Error> Config::Parse(list<string> &argv_list)
 {
     sheep_args::ArgumentParser args;
-    args.AddArgument("mount", "-m", "diretory of the container image");
-    args.AddArgument("command", "-c", "command of the container");
-    args.Parse(argc, argv);
+    args.AddArgument("mount").AddAlias("-m").SetHelp("diretory of the container image");
+    args.AddArgument("command").AddAlias("-c").SetHelp("command of the container");
+    args.Parse(argv_list);
 
-    auto mount = args.GetValueWithError("mount");
-    if (!mount.has_value() )
+    if (!args.IsHasValue("mount"))
     {
-        return sheep_basic::Error("missing required parameter -m, "+args.GetHelp("mount"));
+        return sheep_basic::Error("missing required parameter -m, " + args.GetHelp("mount"));
     }
+    string mount = args.GetValue<string>("mount");
 
-    auto command = args.GetValueWithError("command");
-    if(!command.has_value())
+    if (!args.IsHasValue("command"))
     {
-        return sheep_basic::Error("missing required parameter -c,"+args.GetHelp("command"));
+        return sheep_basic::Error("missing required parameter -c," + args.GetHelp("command"));
     }
-
-    this->mount_dir = mount.value();
-    this->command = command.value();
+    string command = args.GetValue<string>("command");
+    this->mount_dir = move(mount);
+    this->command = move(command);
     return nullopt;
 }

@@ -1,6 +1,7 @@
 #include <string>
 #include <optional>
 #include "sheep_basic.h"
+#include <list>
 using namespace std;
 class CgroupConfig
 {
@@ -14,7 +15,7 @@ public:
 
 public:
     string GenerateRandomHostname();
-    optional<sheep_basic::Error> Parse(int argc, char **argv);
+    optional<sheep_basic::Error> Parse(list<string> &argv_list);
 };
 class Cgroup
 {
@@ -22,6 +23,6 @@ class Cgroup
     string base_path;
 
 public:
-    optional<sheep_basic::Error> InitCgroup(CgroupConfig config);
+    optional<sheep_basic::Error> InitCgroup(const CgroupConfig & config);
     ~Cgroup();
 };

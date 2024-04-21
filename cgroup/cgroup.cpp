@@ -14,58 +14,56 @@ string CgroupConfig::GenerateRandomHostname()
 {
     return sheep_random::RandomString(10, sheep_random::ALL);
 }
-optional<sheep_basic::Error> CgroupConfig::Parse(int argc, char **argv)
+optional<sheep_basic::Error> CgroupConfig::Parse(list<string> &argv_list)
 {
     sheep_args::ArgumentParser args;
-    args.AddArgument("hostname", "--hostname", nullopt, this->GenerateRandomHostname());
-    args.AddArgument("cpu_percent", "--cpu_percent", nullopt, nullopt);
-    args.AddArgument("mem_high", "--mem_high", nullopt, nullopt);
-    args.AddArgument("mem_max", "--mem_max", nullopt, nullopt);
+    args.AddArgument("hostname").AddAlias("--hostname").SetDefaultValue(this->GenerateRandomHostname());
+    args.AddArgument("cpu_percent").AddAlias("--cpu_percent").SetDefaultValue(100);
+    args.AddArgument("mem_high").AddAlias( "--mem_high").SetDefaultValue(1024*1024*1024);
+    args.AddArgument("mem_max").AddAlias("--mem_max").SetDefaultValue(1024*1024*1024);
 
-    args.Parse(argc, argv);
-    this->hostname = args.GetValue("hostname");
+    args.Parse(argv_list);
+    this->hostname = args.GetValue<string>("hostname");
 
     auto keys = args.GetKeys();
 
     for (auto key : keys)
     {
-        cout << key << endl;
         if (key == "cpu_percent")
         {
-            int cpu_percent_temp = stoi(args.GetValue("cpu_percent"));
-            if (cpu_percent_temp <= 0 || cpu_percent_temp > 100)
+            int cpu_percent = args.GetValue<int>("cpu_percent");
+            if (cpu_percent <= 0 || cpu_percent > 100)
             {
-                return {"cpu_percent must in range(1,100),can't be" + key};
+                return {"cpu_percent must in range(1,100),can't be " + to_string(cpu_percent)};
             }
-            this->cpu_percent = cpu_percent_temp;
+            this->cpu_percent = move(cpu_percent);
         }
 
         if (key == "mem_high")
         {
-            int mem_high_temp = stoi(args.GetValue("mem_high"));
-            if (mem_high_temp <= 0)
+            int mem_high = args.GetValue<int>("mem_high");
+            if (mem_high <= 0)
             {
-                return {"mem_high must in bigger than 0,can't be" + key};
+                return {"mem_high must in bigger than 0,can't be " + to_string(mem_high)};
             }
-            this->mem_high = mem_high_temp;
+            this->mem_high = move(mem_high);
         }
 
         if (key == "mem_max")
         {
-            int mem_max_temp = stoi(args.GetValue("mem_max"));
-            cout << mem_max_temp << endl;
-            if (mem_max_temp <= 0)
+            int mem_max = args.GetValue<int>("mem_max");
+            if (mem_max <= 0)
             {
-                return {"mem_max must in bigger than 0,can't be" + key};
+                return {"mem_max must in bigger than 0,can't be " + to_string(mem_max)};
             }
-            this->mem_max = mem_max_temp;
+            this->mem_max = mem_max;
         }
     }
 
     return nullopt;
 }
 
-optional<sheep_basic::Error> Cgroup::InitCgroup(CgroupConfig config)
+optional<sheep_basic::Error> Cgroup::InitCgroup(const CgroupConfig & config)
 {
     this->config = config;
 
@@ -102,7 +100,6 @@ optional<sheep_basic::Error> Cgroup::InitCgroup(CgroupConfig config)
         mem_high_file.close();
         cout << "==> mem_high limit set " + to_string(config.mem_high) + " successfully." << endl;
     }
-    cout << config.mem_max << endl;
 
     if (config.mem_max != 0)
     {

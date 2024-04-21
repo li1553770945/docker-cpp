@@ -3,12 +3,20 @@
 #include <cstring>
 #include "config/config.h"
 #include "cgroup/cgroup.h"
+#include <string>
+#include <vector>
+#include <list>
 using namespace std;
 
 int main(int argc, char **argv)
 {
     Config config;
-    auto err = config.Parse(argc, argv);
+    list <string> argv_list;
+    for(int i=1;i<argc;i++)
+    {
+        argv_list.push_back(argv[i]);
+    }
+    auto err = config.Parse(argv_list);
     if (err)
     {
         cout << err.value().GetMessage() << endl;
@@ -16,9 +24,8 @@ int main(int argc, char **argv)
     }
 
 
-
     CgroupConfig cgroup_config;
-    err = cgroup_config.Parse(argc, argv);
+    err = cgroup_config.Parse(argv_list);
     if (err)
     {
         cout << err.value().GetMessage() << endl;
@@ -32,13 +39,18 @@ int main(int argc, char **argv)
         cout << err.value().GetMessage() << endl;
         return 0;
     }
-
-    int i=0;
-    while(true)
+    cout<<argv_list.size()<<endl;
+    if(!argv_list.empty())
     {
-        cout<<i<<endl;
-        i++;
-        int * p =new int[256];
+        cout<<"==>error:unknow parameter:"+argv_list.front()<<endl;
+        return 0;
     }
+    int i=0;
+    // while(true)
+    // {
+    //     cout<<i<<endl;
+    //     i++;
+    //     int * p =new int[256];
+    // }
     return 0;
 }
