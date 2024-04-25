@@ -33,7 +33,7 @@ int ChildFunction(void *arg)
     cout << "this is child" << endl;
     sheep_log::Logger log = GetLogger();
     Child child(*config, log);
-    sleep(20);
+    child.Run();
     return 0;
 }
 int main(int argc, char **argv)
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
         log[Fatal] << "==>error:unknow parameter:" + argv_list.front() << endl;
         return 0;
     }
-    Cgroup cgroup(&config);
+    Cgroup cgroup(&config,log);
     err = cgroup.InitCgroup();
     if (err)
     {

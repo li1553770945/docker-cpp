@@ -7,14 +7,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fstream>
+#include <string.h>
 
 using namespace std;
-
+using namespace sheep_log;
 string Cgroup::GenerateRandomHostname()
 {
     return sheep_random::RandomString(10, sheep_random::ALL);
 }
-Cgroup::Cgroup(Config * _config):config(_config)
+Cgroup::Cgroup(Config * _config,sheep_log::Logger & _log):config(_config),log(_log)
 {
 
 }
@@ -28,7 +29,7 @@ optional<sheep_basic::Error> Cgroup::InitCgroup()
     }
 
     this->base_path = "/sys/fs/cgroup/" + this->config->hostname;
-    cout << "==>hostname:" << this->config->hostname << endl;
+    log[Info] << "==>hostname:" << this->config->hostname << endl;
     if (mkdir(base_path.data(), 0755) == -1)
     {
         return {sheep_basic::Error(-1, "create cgroup failded!")};
@@ -44,7 +45,7 @@ optional<sheep_basic::Error> Cgroup::InitCgroup()
         }
         cpu_max_file << value;
         cpu_max_file.close();
-        cout << "==> CPU limit set " + to_string(config->cpu_percent) + " successfully." << endl;
+        log[Info] << "==> CPU limit set " + to_string(config->cpu_percent) + " successfully." << endl;
     }
 
     if (config->mem_high != 0)
@@ -58,7 +59,7 @@ optional<sheep_basic::Error> Cgroup::InitCgroup()
         }
         mem_high_file << value;
         mem_high_file.close();
-        cout << "==> mem_high limit set " + to_string(config->mem_high) + " successfully." << endl;
+        log[Info] << "==> mem_high limit set " + to_string(config->mem_high) + " successfully." << endl;
     }
 
     if (config->mem_max != 0)
@@ -72,7 +73,7 @@ optional<sheep_basic::Error> Cgroup::InitCgroup()
         }
         mem_max_file << value;
         mem_max_file.close();
-        cout << "==> mem_max set " + to_string(config->mem_max) + " successfully." << endl;
+        log[Info] << "==> mem_max set " + to_string(config->mem_max) + " successfully." << endl;
     }
 
     string procs_path = base_path + "/cgroup.procs";
@@ -83,7 +84,7 @@ optional<sheep_basic::Error> Cgroup::InitCgroup()
     }
     procs_file << 0; // 限制为10%的CPU使用率
     procs_file.close();
-    cout << "init cgroup success!" << endl;
+    log[Info] << "init cgroup success!" << endl;
     return nullopt;
 }
 
@@ -92,6 +93,6 @@ Cgroup::~Cgroup()
     // TODO:删除创建的cgroup
     if (rmdir(this->base_path.data()) == -1)
     {
-        cout << "remove cgroup failed!" << endl;
+        log[Error] << "remove cgroup failed!" <<strerror(errno)<< endl;
     }
 }

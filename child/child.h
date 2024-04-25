@@ -7,6 +7,7 @@ class Child
     const Config & config;
     Logger log;
     void Init();
+    void InitHostname();
     void InitMount();
 public:
     Child(const Config &config, const Logger &log);
