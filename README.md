@@ -10,6 +10,25 @@ docker是用Go写的，但是可能我心中有一些执念，我一直觉得底
 
 首先需要把sheep-tools放到和docker-cpp相同的文件夹。然后用`cmake .`生成Makefile，再用`make`编译。
 
+## 运行参数
+
+注：
+
+1. max表示相关资源无限制，但是实际参数不可以是max。
+
+
+|参数|说明|是否必填|默认值|
+| -- | -- | -- | -- |
+|-m|容器挂载的根目录|是||
+|-c|运行的命令|是||
+|--cpu_percent|最大CPU时间百分比|否|100|
+|--mem_high|最大内存占用量（字节），超出之后将受到限制|否|max|
+|--mem_max|最大内存占用量（字节），一旦超出立即被kill|否|max|
+
+参数名与值之间使用空格分开，不要写等于号。例如`sudo ./docker-cpp -m asd -c asr --cpu_percent 70`。
+
+**注意运行需要root权限**
+
 ## 参考资料
 
 [Linux 容器底层工作机制：从 500 行 C 代码到生产级容器运行时（2023）](https://arthurchiao.art/blog/linux-container-and-runtime-zh/)
