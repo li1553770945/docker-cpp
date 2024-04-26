@@ -25,7 +25,7 @@ docker是用Go写的，但是可能我心中有一些执念，我一直觉得底
 |--mem_high|最大内存占用量（字节），超出之后将受到限制|否|max|
 |--mem_max|最大内存占用量（字节），一旦超出立即被kill|否|max|
 
-参数名与值之间使用空格分开，不要写等于号。例如`sudo ./docker-cpp -m asd -c asr --cpu_percent 70`。
+参数名与值之间使用空格或者等号，尽量给值加上一个双引号。例如`sudo ./docker-cpp -m "busybox" -c "/bin/bash" --cpu_percent 70`。
 
 **注意运行需要root权限**
 
