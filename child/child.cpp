@@ -8,6 +8,7 @@
 #include <linux/sched.h>
 #include <sys/mount.h>
 #include <memory.h>
+#include <iomanip>
 
 Child::Child(const Config &config, const Logger &log) : log(log),
                                                         config(config)
@@ -16,14 +17,16 @@ Child::Child(const Config &config, const Logger &log) : log(log),
 }
 void Child::Run()
 {
-    const char *args[] = {"/bin/sh",  nullptr};
-    log[Info]<<"running..."<<endl;
-    execve("/bin/sh",const_cast<char* const*>(args), NULL);
-    log[Info]<<"running end"<<endl;
+
+    log[Info] << "running \"" + config.command + "\"" << endl;
+  
+    execve(args[0], args.data(), NULL);
+    log[Info] << "running end" << endl;
 }
 
 void Child::Init()
 {
+    this->InitArgs();
     this->InitHostname();
     this->InitMount();
 }
@@ -48,8 +51,6 @@ void Child::InitMount()
     }
     log[Info] << "mount dir " << mount_dir << endl;
 
-
-
     string old_mount_basename = "/oldroot." + config.hostname + "XXXXXX";
     string old_mount_dir = mount_dir + old_mount_basename;
     old_mount_dir = mkdtemp(old_mount_dir.data());
@@ -57,7 +58,7 @@ void Child::InitMount()
 
     log[Info] << "old mount dir" << old_mount_dir << endl;
     res = syscall(SYS_pivot_root, mount_dir.data(), old_mount_dir.data());
-    if (res<0)
+    if (res < 0)
     {
         log[Fatal] << "pivot_root syscall FAILED! " << strerror(errno) << endl;
     }
@@ -68,8 +69,24 @@ void Child::InitMount()
         log[Error] << "unmount old root failed! " << strerror(errno) << endl;
     }
     res = rmdir(old_mount_basename.data());
-      if (res)
+    if (res)
     {
         log[Error] << "delete old root failed! " << strerror(errno) << endl;
     }
+}
+void Child::InitArgs()
+{
+   
+    string token;
+    istringstream iss(config.command);
+    while (iss >> quoted(token))
+    {
+        tokens.push_back(token);
+    }
+
+    for (auto &arg : tokens)
+    {
+        args.push_back(&arg[0]);
+    }
+    args.push_back(nullptr); // 必须以 nullptr 结尾
 }
